@@ -15,14 +15,14 @@ exemple :
 exeSites.sh "composer update" 2
 ```
 
-OPTIONS du script:
+## Syntaxe :
 ```sh
 exeSites.sh [options] [arguments]
 ```
-options:
+*Options :*
 ```sh
--h|?            Affiche cette aide | show brief help
--a              A utiliser avec l'option 'f' pour entrer un chemin absolu
+-h|?            Affiche cette aide
+-a              A utiliser avec l\'option "f" pour entrer un chemin absolu
 -[a]f FICHIER   Nom/Chemin du FICHIER des sites à gérer
 -y              Confirmation automatique
 -v              Verbeux (inactif actuellement)
