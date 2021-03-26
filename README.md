@@ -9,3 +9,9 @@ Puis lancez le script en ajoutant la commande à exécuter en paramètre, exempl
 exeSites.sh "drush status"
 exeSites.sh "composer require drupal/token"
 ```
+Un deuxième paramètre facultatif peut être renseigné pour limiter la commande à un seul site, il faut pour cela rajouter le numéro du site que l'on trouve dans la liste.
+exemple :
+```sh
+exeSites.sh "composer update" 2
+```
+
