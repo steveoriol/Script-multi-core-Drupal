@@ -1,96 +1,141 @@
 #!/bin/bash
 
+a_flag='false'
+b_flag='false'
+y_flag='false'
+filesites=''
+verbose='false'
+
+print_usage() {
+  printf "Usage:\n"
+  printf "exeSites.sh [options] [arguments]\n\n"
+  printf "options:\n"
+  printf "-h|?            Affiche cette aide | show brief help\n"
+  printf "-a              A utiliser avec l'option 'f' pour entrer un chemin absolu\n"
+  printf "-[a]f FICHIER   Nom/Chemin du FICHIER des sites à gérer\n"
+  printf "-y              Confirmation automatique\n"
+  printf "-b              (inactif actuellement)\n"
+  printf "-v              Verbeux (inactif actuellement)\n"
+}
+
+while getopts 'abyf:vh?' flag; do
+  case "${flag}" in
+    a) a_flag='true' ;;
+    b) b_flag='true' ;;
+    y) y_flag='true' ;;
+    f) filesites="${OPTARG}" ;;
+    v) verbose='true' ;;
+    h|?) print_usage
+       exit 1 ;;
+  esac
+done
+
+shift $(($OPTIND - 1))
+#printf "Remaining arguments are: %s\n" "$*"
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-filename=$DIR/sites.txt
+
+if [ ! -z "$filesites" ]; then
+    #printf 'Option -f "%s" specified\n' "$filesites"
+    if [ $a_flag = 'false' ]; then
+        filename=$DIR/$filesites
+    else 
+        filename=$filesites
+    fi
+else
+    filename=$DIR/sites.txt
+fi
+
 DORIGINE=`pwd`
 IDSITE=1
-echo "#####################################################"
-echo "#  Script de gestion de plusieurs instances drupal  #"
-echo "#                 [ version 0.3 ]                   #"
-echo "#####################################################"
-echo ""
-echo "Liste les instances traitées (Ajouter les dossiers racines dans le fichier $filename) : "
+printf "\e[94m\n"
+printf "  #####################################################\n"
+printf "  #  Script de gestion de plusieurs instances drupal  #\n"
+printf "  #                 [ version 0.4 ]                   #\n"
+printf "  #####################################################\n\n"
+
+printf "\e[39mListe les instances à traiter (voir : $filename) : \n"
 
 while IFS= read -r dpath; 
 do
-	#Si la ligne est commentée on passe a la suivante
+        #Si la ligne est commentée on passe a la suivante
         if [[ ${dpath:0:1} == '#' ]]; then
                 continue
         fi
-	echo "  => $dpath ($IDSITE)";
-	((IDSITE=IDSITE+1))
+        printf "  => \e[94m(\e[1m $IDSITE \e[21m)\e[39m $dpath \n";
+        ((IDSITE=IDSITE+1))
 done < $filename
 ((IDSITE=IDSITE-1))
 
-echo "Note: les lignes débutant par '#', sont ignorées."
-echo ""
 
 # 2ème parametre
 if [ $# -ne 2 ]
 then
-	SITETOUSE="ALL"
+        SITETOUSE="ALL"
 else
-	SITETOUSE=$2
+        SITETOUSE=$2
 fi
 
 # Infos & Confirmation:
 if test "$1" == "" 
    then 
-     echo "Il manque la commande à exécuter ;-)" 
-     echo "Exemples : exeSites.sh \"drush status\""
-     echo "           exeSites.sh \"composer require drupal/coffee:1.x-dev@dev\""
-     echo "           exeSites.sh \"composer update\" 2  <-- (pour exécuter seulement sur le site n°2)"
+     printf "\nIl manque la commande à exécuter ;-)\n" 
+     printf "Exemples : exeSites.sh \"drush status\"\n"
+     printf "           exeSites.sh \"composer require drupal/coffee:1.x-dev@dev\"\n"
+     printf "           exeSites.sh \"composer update\" 2  <-- (pour exécuter seulement sur le site n°2)\n"
      exit 1 
    else
-     echo "exécuter la commande : $1"
+     printf "\nExécuter la commande :\e[94m\e[1m $1 \e[21m\e[39m\n"
      if [ $SITETOUSE = "ALL" ]
      then
-	     echo " sur tous les sites listés [$IDSITE site(s)]"
+             printf "                       sur tous les sites listés [$IDSITE site(s)]\n"
      else
-	     echo " sur le site numéro $SITETOUSE"
+             printf "                       sur le site numéro\e[94m\e[1m $SITETOUSE \e[21m\e[39m\n"
      fi
 fi
 
 getConfirmContinue() {
     local REPONSE=""
 
-    echo -e "Confirmez ? (o/n) : \c"
+    echo -e "                       \e[47m\e[31m\e[1m Confirmez ? [oui|yes|o|y] \e[21m\e[39m\e[49m : \c"
     read REPONSE
-    if test "$REPONSE" != "o" -a "$REPONSE" != "O"
+    if test "$REPONSE" != "o" -a "$REPONSE" != "y" -a "$REPONSE" != "yes" -a "$REPONSE" != "oui"
+#    if [[ $REPONSE != "o" || $REPONSE != "y" ]]
     then
-        echo "(reponse = non)"
+        printf "\e[90m                       --> Commande annulé, car non confirmée.\e[39m\n"
         exit 1
     else
         return 0
     fi
 }
-getConfirmContinue
+if [[ $y_flag != 'true' ]]; then
+        getConfirmContinue
+fi
 
 IDSITE=1
 
-echo Début:
+printf "\e[90m\e[4mDébut:\e[24m\e[39m\n"
 
 while IFS= read -r dpath; 
 do
-	#Si la ligne est commentée on passe a la suivante
-	if [[ ${dpath:0:1} == '#' ]]; then
-	       	continue
-       	fi
-	
-	#ALL sites ou un seul.
-	if [[ $SITETOUSE = "ALL" || $IDSITE = $SITETOUSE ]]; then
-		echo ""
-		echo ">>$dpath<<";
-		if  cd $dpath 
-		then
-			$1	
-		else
-        		echo "Rien à faire ici ..."
-		fi
-	fi
-	((IDSITE=IDSITE+1))
+        #Si la ligne est commentée on passe a la suivante
+        if [[ ${dpath:0:1} == '#' ]]; then
+                continue
+        fi
+
+        #ALL sites ou un seul.
+        if [[ $SITETOUSE = "ALL" || $IDSITE = $SITETOUSE ]]; then
+                printf "\n\e[90msite \e[94m(\e[1m $IDSITE \e[21m)\e[90m >> $dpath <<\e[39m\n\n";
+                if  cd $dpath 
+                then
+                        $1
+                else
+                        printf "Rien à faire ici ...\n"
+                fi
+        fi
+        ((IDSITE=IDSITE+1))
 
 done < $filename
 
 cd $DORIGINE
-echo Fin..
+printf "\n\e[90m\e[4mFin..\e[24m\e[39m\n"
