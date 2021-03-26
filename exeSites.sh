@@ -5,14 +5,15 @@ filename=$DIR/sites.txt
 DORIGINE=`pwd`
 echo "#####################################################"
 echo "#  Script de gestion de plusieurs instances drupal  #"
-echo "#                 [ version 0.1 ]                   #"
+echo "#                 [ version 0.2 ]                   #"
 echo "#####################################################"
 echo ""
 echo "Liste les instances traitées (Ajouter les dossiers racines dans le fichier $filename) : "
 while IFS= read -r dpath; 
 do
-	echo ">>$dpath<<";
+	echo "  => $dpath";
 done < $filename
+echo "Note: les lignes débutant par '#', sont ignorées."
 echo ""
 
 if test "$1" == "" 
@@ -44,7 +45,12 @@ getConfirmContinue
 echo Début:
 
 while IFS= read -r dpath; 
-do 
+do
+	#Si la ligne est commentée on passe a la suivante
+	if [[ ${dpath:0:1} == '#' ]]; then
+	       	continue
+       	fi
+
 	echo ""
 	echo ">>$dpath<<";
 	if  cd $dpath 
