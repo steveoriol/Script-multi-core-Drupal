@@ -57,7 +57,7 @@ IDSITE=1
 printf "\e[94m\n"
 printf "  #####################################################\n"
 printf "  #  Script de gestion de plusieurs instances drupal  #\n"
-printf "  #                 [ version 0.4 ]                   #\n"
+printf "  #                 [ version 0.5 ]                   #\n"
 printf "  #####################################################\n\n"
 
 printf "\e[39mListe les instances à traiter (voir : $filename) : \n"
