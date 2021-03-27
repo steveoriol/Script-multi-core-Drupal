@@ -8,7 +8,7 @@ verbose='false'
 
 print_usage() {
   printf "Usage:\n"
-  printf "exeSites.sh [options] [arguments]\n\n"
+  printf "xcsites [options] [arguments]\n\n"
   printf "options:\n"
   printf "-h|?            Affiche cette aide | show brief help\n"
   printf "-a              A utiliser avec l'option 'f' pour entrer un chemin absolu\n"
@@ -34,16 +34,22 @@ shift $(($OPTIND - 1))
 #printf "Remaining arguments are: %s\n" "$*"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+#printf "DIR: $DIR \n"
+# Absolute path to this script. /home/user/bin/foo.sh
+SCRIPT=$(readlink -f $0)
+# Absolute path this script is in. /home/user/bin
+SCRIPTPATH=`dirname $SCRIPT`
+#printf "SCRIPT: $SCRIPT / SCRIPTPATH: $SCRIPTPATH \n"
 
 if [ ! -z "$filesites" ]; then
     #printf 'Option -f "%s" specified\n' "$filesites"
     if [ $a_flag = 'false' ]; then
-        filename=$DIR/$filesites
+        filename=$SCRIPTPATH/$filesites
     else 
         filename=$filesites
     fi
 else
-    filename=$DIR/sites.txt
+    filename=$SCRIPTPATH/sites.txt
 fi
 
 DORIGINE=`pwd`
@@ -80,9 +86,9 @@ fi
 if test "$1" == "" 
    then 
      printf "\nIl manque la commande à exécuter ;-)\n" 
-     printf "Exemples : exeSites.sh \"drush status\"\n"
-     printf "           exeSites.sh \"composer require drupal/coffee:1.x-dev@dev\"\n"
-     printf "           exeSites.sh \"composer update\" 2  <-- (pour exécuter seulement sur le site n°2)\n"
+     printf "Exemples : xcsites \"drush status\"\n"
+     printf "           xcsites \"composer require drupal/coffee:1.x-dev@dev\"\n"
+     printf "           xcsites \"composer update\" 2  <-- (pour exécuter seulement sur le site n°2)\n"
      exit 1 
    else
      printf "\nExécuter la commande :\e[94m\e[1m $1 \e[21m\e[39m\n"
