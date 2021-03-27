@@ -2,6 +2,7 @@
 
 a_flag='false'
 b_flag='false'
+c_flag='false'
 y_flag='false'
 filesites=''
 verbose='false'
@@ -10,18 +11,20 @@ print_usage() {
   printf "Usage:\n"
   printf "xcsites [options] [arguments]\n\n"
   printf "options:\n"
-  printf "-h|?            Affiche cette aide | show brief help\n"
-  printf "-a              A utiliser avec l'option 'f' pour entrer un chemin absolu\n"
-  printf "-[a]f FICHIER   Nom/Chemin du FICHIER des sites à gérer\n"
-  printf "-y              Confirmation automatique\n"
-  printf "-b              (inactif actuellement)\n"
-  printf "-v              Verbeux (inactif actuellement)\n"
+  printf " -h|?            Affiche cette aide | show brief help\n"
+  printf " -c              Exécuter une commande spéciale du dossier 'commands'\n"
+  printf " -a              A utiliser avec l'option 'f' pour entrer un chemin absolu\n"
+  printf " -[a]f FICHIER   Nom/Chemin du FICHIER des sites à gérer\n"
+  printf " -y              Confirmation automatique\n"
+  printf " -b              (inactif actuellement)\n"
+  printf " -v              Verbeux (inactif actuellement)\n"
 }
 
-while getopts 'abyf:vh?' flag; do
+while getopts 'abcyf:vh?' flag; do
   case "${flag}" in
     a) a_flag='true' ;;
     b) b_flag='true' ;;
+    c) c_flag='true' ;;
     y) y_flag='true' ;;
     f) filesites="${OPTARG}" ;;
     v) verbose='true' ;;
@@ -57,7 +60,7 @@ IDSITE=1
 printf "\e[94m\n"
 printf "  #####################################################\n"
 printf "  #  Script de gestion de plusieurs instances Drupal  #\n"
-printf "  #                 [ version 0.5 ]                   #\n"
+printf "  #                 [ version 0.6 ]                   #\n"
 printf "  #####################################################\n\n"
 
 printf "\e[39mListe les instances à traiter (voir : $filename) : \n"
@@ -91,7 +94,11 @@ if test "$1" == ""
      printf "           xcsites \"composer update\" 2  <-- (pour exécuter seulement sur le site n°2)\n"
      exit 1 
    else
-     printf "\nExécuter la commande :\e[94m\e[1m $1 \e[21m\e[39m\n"
+     if [ $c_flag = 'false' ]; then
+     	printf "\nExécuter la commande :\e[94m\e[1m $1 \e[21m\e[39m\n"
+     else
+	printf "\nExécuter la commande script :\e[94m\e[1m $1 \e[21m\e[39m\n"
+     fi
      if [ $SITETOUSE = "ALL" ]
      then
              printf "                       sur tous les sites listés [$IDSITE site(s)]\n"
@@ -134,7 +141,11 @@ do
                 printf "\n\e[90msite \e[94m(\e[1m $IDSITE \e[21m)\e[90m >> $dpath <<\e[39m\n\n";
                 if  cd $dpath 
                 then
-                        $1
+			if [ $c_flag = 'false' ]; then
+                        	$1
+			else
+				$SCRIPTPATH/commands/$1
+			fi
                 else
                         printf "Rien à faire ici ...\n"
                 fi

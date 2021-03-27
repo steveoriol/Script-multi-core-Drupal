@@ -1,0 +1,35 @@
+#!/bin/bash
+
+printf "Script de Création d'un sous-thème Zurb Foundation\n"
+
+DIRFILE='web/themes/contrib/zurb_foundation/STARTER'
+printf "$PWD/$DIRFILE\n"
+
+if [ ! -d "$PWD/$DIRFILE" ]; then
+    printf "Le module 'zurb_foundation' doit d'abord etre disponible...\n"
+    exit 0
+fi
+
+echo Hello, who am I talking to?
+read varname
+echo It\'s nice to meet you $varname
+
+while IFS= read -r -d $'\0' file; do
+  echo "$file"
+done < <(find . -print0)
+
+SUBTNAME="---"
+#printf "Comment voulez vous nommer le sous-thème :\n"
+getSubThemeName() {
+#    local SUBTNAME="---"  
+    printf "\e[47m\e[31m\e[1m Comment voulez-vous nommer le sous-thème : \e[21m\e[39m\e[49m : " 
+    read SUBTNAME
+    if [ "$SUBTNAME" = "" ]; then 
+        printf "\e[90m --> Merci de donner un nom au sous-thème\e[39m\n" 
+        exit 1 
+    else 
+        return 0 
+    fi
+}
+getSubThemeName
+printf "le nom est $SUBTNAME"
