@@ -56,7 +56,7 @@ DORIGINE=`pwd`
 IDSITE=1
 printf "\e[94m\n"
 printf "  #####################################################\n"
-printf "  #  Script de gestion de plusieurs instances drupal  #\n"
+printf "  #  Script de gestion de plusieurs instances Drupal  #\n"
 printf "  #                 [ version 0.5 ]                   #\n"
 printf "  #####################################################\n\n"
 
