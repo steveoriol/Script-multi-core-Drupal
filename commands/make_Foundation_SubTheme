@@ -27,7 +27,7 @@ getSubThemeName() {
 	SUBTID=$(echo ${tmp,,} | iconv -f utf8 -t ascii//TRANSLIT)
 	printf "               le nom sera :\e[94m\e[1m $SUBTNAME \e[21m\e[39m\n"
         printf "          et l'identifiant :\e[94m\e[1m $SUBTID \e[21m\e[39m\n"
-	printf "   \e[47m\e[31m\e[1m Continué avec ces noms (y|o / n) ? \e[21m\e[39m\e[49m : "
+	printf "   \e[47m\e[31m\e[1m Continuer avec ces noms (y|o / n) ? \e[21m\e[39m\e[49m : "
 	read choix
 	case "$choix" in 
   		o|O|y|Y ) printf "\n\e[90mOui\e[39m\n";;
@@ -49,6 +49,11 @@ if [ ! -d "$PWD/web/themes/custom" ]; then
    mkdir -p "$PWD/web/themes/custom"
 fi
 
+SCRIPT=$(readlink -f $0)
+# Absolute path this script is in. /home/user/bin
+SCRIPTPATH=`dirname $SCRIPT`
+#printf "SCRIPT: $SCRIPT / SCRIPTPATH: $SCRIPTPATH \n"
+
 DSUBT="$PWD/web/themes/custom/$SUBTID"
 #printf "PWD:$PWD \n"
 #printf "SUBTNAME:$SUBTNAME \n"
@@ -56,13 +61,30 @@ DSUBT="$PWD/web/themes/custom/$SUBTID"
 #printf ">> $PWD/web/themes/custom/$SUBTID \n"
 #printf "DSUBT: $DSUBT \n"
 
+# copie du fichiers du thème:
 cp "$PWD/$DIRSTARTER" "$DSUBT" -r
+# copie des templates:
+cp "$DSUBT/../../contrib/zurb_foundation/templates/" "$DSUBT/templates/" -r
+# Modif des configurations du module:
+cp "$SCRIPTPATH/../configurations/make_Foundation_SubTheme/STARTER.settings.yml" "$DSUBT/config/install/" 
+# Autre des configurations post install:
+mkdir "$DSUBT/config/post"
+cp "$SCRIPTPATH/../configurations/make_Foundation_SubTheme/system.theme.global.yml" "$DSUBT/config/post/" 
+
+# Modifications divers:
+patch -u "$DSUBT/scss/STARTER.scss" "$SCRIPTPATH/../patchs/make_Foundation_SubTheme/STARTER.patch"
+patch -u "$DSUBT/scss/_settings.scss" "$SCRIPTPATH/../patchs/make_Foundation_SubTheme/_settings.patch"
+patch -u "$DSUBT/scss/base/_elements.scss" "$SCRIPTPATH/../patchs/make_Foundation_SubTheme/_elements.patch"
+
+# Changement des Noms :
 find $DSUBT -name '*info.yml.txt' | rename 's/.info.yml.txt/.info.yml/'
 find $DSUBT -name '*STARTER*' | rename "s/STARTER/$SUBTID/"
 $(grep -nr 'STARTER' -l $DSUBT | xargs sed -i "s/STARTER/$SUBTID/g")
 $(grep -nr 'Starter' -l $DSUBT | xargs sed -i "s/Starter/$SUBTNAME/g")
 cd $DSUBT
 npm install
+
+# Génération du CSS
 if ! command -v gulp &> /dev/null 
 then
 	printf "Installez le programme \e[94m\e[1mgulp\e[21m\e[39m (en global)\n"
@@ -75,3 +97,17 @@ fi
 printf "\n >>> le sous-thème \"$SUBTID\" est disponible \e[92m\e[1m;-)\e[21m\e[39m\n"
 printf "     ICI :\e[90m $DSUBT \e[39m\n"
 
+# Mise en place du nouveau theme
+printf "   \e[47m\e[31m\e[1m Activer le thème maintenant (y|o / n) ? \e[21m\e[39m\e[49m : "
+read miseEnPlace
+case "$miseEnPlace" in 
+  		o|O|y|Y )   printf "\n\e[90mOui\e[39m\n"
+                    drush theme:enable $SUBTID
+                    drush config-set system.theme default $SUBTID -y
+                    drush cim -y --partial --source=$DSUBT/config/post/
+                    drush cr ;;
+  		* ) printf "\n\e[90mPas pour le moment...\e[39m\n";;
+esac
+
+
+#drush config-set system.theme admin seven

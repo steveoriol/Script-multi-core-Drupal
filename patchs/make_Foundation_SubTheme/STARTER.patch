@@ -1,0 +1,36 @@
+--- /var/www/studio-jamaisvu/web/themes/contrib/zurb_foundation/STARTER/scss/STARTER.scss	2021-03-17 11:29:14.503678169 +0100
++++ scss/sjvt.scss	2021-03-28 14:34:39.159456822 +0200
+@@ -2,9 +2,6 @@
+ // This application file (THEMENAME.scss) is where all the partials are
+ // imported.
+ //
+-// Do not name this file "STARTER.scss". This file should be named
+-// THEMENAME.scss.
+-//
+ // The first half of the file imports Zurb Foundation elements.
+ // The second half is for you to included component files to
+ // further customize the theme.
+@@ -151,18 +148,18 @@
+ // Import your mixins early so they can be used by other partials. (optional)
+ // @import 'base/mixins';
+ // @import 'base/common';
+-// @import 'base/elements';
++@import 'base/elements';
+ 
+ // --- Layout ---
+ // Each section of the document has it's own partial seperated out to improve
+ // developer experience. Additionally, grids can be declared in layouts as well.
+-//@import 'layout/header';
+-//@import 'layout/main';
++@import 'layout/header';
++@import 'layout/main';
+ //@import 'layout/aside';
+-//@import 'layout/footer';
++@import 'layout/footer';
+ 
+ // --- Modules ---
+-// @import 'modules/block';
++@import 'modules/block';
+ // @import 'modules/button';
+ 
+ // --- States ---

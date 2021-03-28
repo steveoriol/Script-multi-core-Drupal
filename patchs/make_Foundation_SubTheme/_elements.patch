@@ -1,0 +1,14 @@
+--- /var/www/studio-jamaisvu/web/themes/contrib/zurb_foundation/STARTER/scss/base/_elements.scss	2021-03-17 11:29:14.503678169 +0100
++++ scss/base/_elements.scss	2021-03-28 12:12:22.708941746 +0200
+@@ -20,6 +20,11 @@
+ // a:active,
+ // a:hover {}
+ 
++// IMG
++img {
++    width: 100%;
++}
++
+ // Form Input
+ //-----------------------------------------------------------------------------
+ // input[type="text"],

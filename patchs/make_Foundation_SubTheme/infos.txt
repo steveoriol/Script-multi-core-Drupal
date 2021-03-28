@@ -1,0 +1,11 @@
+# Création des patchs:
+
+colordiff -u /var/www/studio-jamaisvu/web/themes/contrib/zurb_foundation/STARTER/scss/base/_elements.scss scss/base/_elements.scss \
+> ~/Script-multi-core-Drupal/patchs/make_Foundation_SubTheme/_elements.patch
+
+colordiff -u /var/www/studio-jamaisvu/web/themes/contrib/zurb_foundation/STARTER/scss/_settings.scss scss/_settings.scss \
+> ~/Script-multi-core-Drupal/patchs/make_Foundation_SubTheme/_settings.patch
+
+colordiff -u /var/www/studio-jamaisvu/web/themes/contrib/zurb_foundation/STARTER/scss/STARTER.scss scss/sjvt.scss \
+> ~/Script-multi-core-Drupal/patchs/make_Foundation_SubTheme/STARTER.patch
+
