@@ -1,35 +1,77 @@
 #!/bin/bash
 
-printf "Script de Création d'un sous-thème Zurb Foundation\n"
+printf ">> Script de Création d'un sous-thème Zurb Foundation\n\n"
 
-DIRFILE='web/themes/contrib/zurb_foundation/STARTER'
-printf "$PWD/$DIRFILE\n"
+DIRSTARTER='web/themes/contrib/zurb_foundation/STARTER'
+#printf "$PWD/$DIRSTARTER\n"
 
-if [ ! -d "$PWD/$DIRFILE" ]; then
+if [ ! -d "$PWD/$DIRSTARTER" ]; then
     printf "Le module 'zurb_foundation' doit d'abord etre disponible...\n"
     exit 0
 fi
+command -v rename >/dev/null 2>&1 || { echo >&2 "Installez le programme 'rename', ce script en a besoin."; exit 1; }
+command -v npm >/dev/null 2>&1 || { echo >&2 "Installez le programme 'npm', ce script en a besoin."; exit 1; }
 
-echo Hello, who am I talking to?
-read varname
-echo It\'s nice to meet you $varname
 
-while IFS= read -r -d $'\0' file; do
-  echo "$file"
-done < <(find . -print0)
+SUBTNAME=""
+SUBTID=""
 
-SUBTNAME="---"
-#printf "Comment voulez vous nommer le sous-thème :\n"
 getSubThemeName() {
-#    local SUBTNAME="---"  
-    printf "\e[47m\e[31m\e[1m Comment voulez-vous nommer le sous-thème : \e[21m\e[39m\e[49m : " 
+    printf "\e[47m\e[31m\e[1m Comment voulez-vous nommer le sous-thème \e[21m\e[39m\e[49m : " 
     read SUBTNAME
     if [ "$SUBTNAME" = "" ]; then 
-        printf "\e[90m --> Merci de donner un nom au sous-thème\e[39m\n" 
-        exit 1 
-    else 
-        return 0 
+        printf "\e[90m --> Merci de donner un nom au sous-thème\e[39m\n"
+        getSubThemeName
+    else
+	tmp=${SUBTNAME// /_}
+	SUBTID=$(echo ${tmp,,} | iconv -f utf8 -t ascii//TRANSLIT)
+	printf "               le nom sera :\e[94m\e[1m $SUBTNAME \e[21m\e[39m\n"
+        printf "          et l'identifiant :\e[94m\e[1m $SUBTID \e[21m\e[39m\n"
+	printf "   \e[47m\e[31m\e[1m Continué avec ces noms (y|o / n) ? \e[21m\e[39m\e[49m : "
+	read choix
+	case "$choix" in 
+  		o|O|y|Y ) printf "\n\e[90mOui\e[39m\n";;
+  		* ) printf "\n\e[90mChoissiez un autre nom, alors...\e[39m\n"
+			getSubThemeName;;
+	esac
     fi
+
+    if [ -d "$PWD/web/themes/custom/$SUBTID" ]; then
+       printf "Ce sous-thème existe déjà, choisir un autre nom...\n"
+       getSubThemeName
+    fi
+    return
 }
 getSubThemeName
-printf "le nom est $SUBTNAME"
+
+if [ ! -d "$PWD/web/themes/custom" ]; then
+   printf "Création du dossier '$PWD/web/themes/custom'\n"
+   mkdir -p "$PWD/web/themes/custom"
+fi
+
+DSUBT="$PWD/web/themes/custom/$SUBTID"
+#printf "PWD:$PWD \n"
+#printf "SUBTNAME:$SUBTNAME \n"
+#printf "SUBTID:$SUBTID \n"
+#printf ">> $PWD/web/themes/custom/$SUBTID \n"
+#printf "DSUBT: $DSUBT \n"
+
+cp "$PWD/$DIRSTARTER" "$DSUBT" -r
+find $DSUBT -name '*info.yml.txt' | rename 's/.info.yml.txt/.info.yml/'
+find $DSUBT -name '*STARTER*' | rename "s/STARTER/$SUBTID/"
+$(grep -nr 'STARTER' -l $DSUBT | xargs sed -i "s/STARTER/$SUBTID/g")
+$(grep -nr 'Starter' -l $DSUBT | xargs sed -i "s/Starter/$SUBTNAME/g")
+cd $DSUBT
+npm install
+if ! command -v gulp &> /dev/null 
+then
+	printf "Installez le programme \e[94m\e[1mgulp\e[21m\e[39m (en global)\n"
+        printf "installation sous debian : \e[92m\e[1msudo npm install -g gulp\e[21m\e[39m\n"
+	printf "            ==> Il le faut pour générer le CSS du thème.\n" 
+else
+	gulp
+fi
+
+printf "\n >>> le sous-thème \"$SUBTID\" est disponible \e[92m\e[1m;-)\e[21m\e[39m\n"
+printf "     ICI :\e[90m $DSUBT \e[39m\n"
+

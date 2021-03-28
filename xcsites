@@ -65,16 +65,19 @@ printf "  #####################################################\n\n"
 
 printf "\e[39mListe les instances à traiter (voir : $filename) : \n"
 
+#https://linuxize.com/post/how-to-read-a-file-line-by-line-in-bash/
 while IFS= read -r dpath; 
 do
         #Si la ligne est commentée on passe a la suivante
         if [[ ${dpath:0:1} == '#' ]]; then
                 continue
         fi
+	ADPATH+=( "${dpath}" )
         printf "  => \e[94m(\e[1m $IDSITE \e[21m)\e[39m $dpath \n";
         ((IDSITE=IDSITE+1))
 done < $filename
 ((IDSITE=IDSITE-1))
+#declare -p ADPATH
 
 
 # 2ème parametre
@@ -129,17 +132,14 @@ IDSITE=1
 
 printf "\e[90m\e[4mDébut:\e[24m\e[39m\n"
 
-while IFS= read -r dpath; 
+for i in "${!ADPATH[@]}" 
 do
-        #Si la ligne est commentée on passe a la suivante
-        if [[ ${dpath:0:1} == '#' ]]; then
-                continue
-        fi
 
         #ALL sites ou un seul.
+	((IDSITE=i+1))
         if [[ $SITETOUSE = "ALL" || $IDSITE = $SITETOUSE ]]; then
-                printf "\n\e[90msite \e[94m(\e[1m $IDSITE \e[21m)\e[90m >> $dpath <<\e[39m\n\n";
-                if  cd $dpath 
+                printf "\n\e[90msite \e[94m(\e[1m $IDSITE \e[21m)\e[90m >> ${ADPATH[i]} <<\e[39m\n\n";
+                if  cd ${ADPATH[i]} 
                 then
 			if [ $c_flag = 'false' ]; then
                         	$1
@@ -150,9 +150,8 @@ do
                         printf "Rien à faire ici ...\n"
                 fi
         fi
-        ((IDSITE=IDSITE+1))
 
-done < $filename
+done
 
 cd $DORIGINE
 printf "\n\e[90m\e[4mFin..\e[24m\e[39m\n"
